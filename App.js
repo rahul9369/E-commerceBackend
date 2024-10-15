@@ -18,9 +18,9 @@ mongoose
     console.log(err);
   });
 
-app.get("/", () => {
-  "get data";
-});
+// app.get("/", () => {
+//   "get data";
+// });
 
 //seedDB();
 // req.body ko backend me pass karne ke iska use karte hai
