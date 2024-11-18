@@ -1,10 +1,12 @@
 const express = require("express");
 const app = express();
-const seedDB = require("./seed");
-const seedDB1 = require("./seedProfile");
+//const seedDB = require("./seed");
+//const seedDB1 = require("./seedProfile");
 const productRoutes = require("./routes/productRoute");
 const userRoutes = require("./routes/userRouter");
 require("dotenv").config();
+
+const cors = require("cors");
 
 const mongoose = require("mongoose");
 mongoose
@@ -18,17 +20,14 @@ mongoose
     console.log(err);
   });
 
-// app.get("/", () => {
-//   "get data";
-// });
-
-seedDB();
-seedDB1();
+//seedDB();
+//seedDB1();
 
 // req.body ko backend me pass karne ke iska use karte hai
 app.use(express.json());
 app.use(productRoutes);
 app.use(userRoutes);
+app.use(cors());
 
 app.listen(3000, () => {
   console.log("server Start at Port 3000!!!");
