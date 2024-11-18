@@ -1,34 +1,47 @@
 const express = require("express");
 const app = express();
-//const seedDB = require("./seed");
-//const seedDB1 = require("./seedProfile");
+const cors = require("cors");
+const mongoose = require("mongoose");
 const productRoutes = require("./routes/productRoute");
 const userRoutes = require("./routes/userRouter");
 require("dotenv").config();
 
-const cors = require("cors");
+// Apply CORS Middleware before any routes
+app.use(cors());
 
-const mongoose = require("mongoose");
+// Parse incoming JSON requests
+app.use(express.json());
+
+// Connect to MongoDB
 mongoose
-  // .connect("mongodb://127.0.0.1:27017/myapp")
-  .connect(process.env.DB_URL)
+  .connect(process.env.DB_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
     console.log("DB CONNECTED");
   })
   .catch((err) => {
-    console.log("OH NO ERROR");
-    console.log(err);
+    console.error("Database connection error:", err.message);
   });
 
-//seedDB();
-//seedDB1();
-
-// req.body ko backend me pass karne ke iska use karte hai
-app.use(express.json());
+// Use routes
 app.use(productRoutes);
 app.use(userRoutes);
-app.use(cors());
 
-app.listen(3000, () => {
-  console.log("server Start at Port 3000!!!");
+// Fallback route for unmatched endpoints
+app.use((req, res, next) => {
+  res.status(404).json({ error: "Route not found" });
+});
+
+// General error handler
+app.use((err, req, res, next) => {
+  console.error("Error:", err.message);
+  res.status(500).json({ error: "Internal server error" });
+});
+
+// Start the server on PORT or default to 3000
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server started on port ${PORT}`);
 });
