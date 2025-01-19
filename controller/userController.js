@@ -14,8 +14,9 @@ const login = async (req, res) => {
   try {
     const user = await User.login(email, password);
     // create
+    id = user._id;
     const token = createToken(user._id);
-    res.status(200).json({ msg: "Successfully Login!!", email, token });
+    res.status(200).json({ msg: "Successfully Login!!", id, email, token });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -29,11 +30,26 @@ const signup = async (req, res) => {
   try {
     const user = await User.signup(email, password, username);
     console.log(user);
+    id = user._id;
     const token = createToken(user._id);
-    res.status(200).json({ msg: "Successfully Resister!!", email, token });
+    res
+      .status(200)
+      .json({ msg: "Successfully Resister!!", id, username, email, token });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 };
 
-module.exports = { login, signup };
+const getUser = (req, res) => {
+  try {
+    const user = req.user;
+    const { authorization } = req.headers;
+    const token = authorization.split(" ")[1];
+
+    res.status(200).json({ email: user.email, token: token });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+module.exports = { login, signup, getUser };

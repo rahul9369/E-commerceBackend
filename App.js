@@ -5,6 +5,7 @@ const cors = require("cors");
 //const seedDB1 = require("./seedProfile");
 const productRoutes = require("./routes/productRoute");
 const userRoutes = require("./routes/userRouter");
+const cartRoutes = require("./routes/cartRouter");
 require("dotenv").config();
 
 app.use(cors());
@@ -28,6 +29,7 @@ mongoose
 app.use(express.json());
 app.use(productRoutes);
 app.use(userRoutes);
+app.use(cartRoutes);
 
 app.listen(3000, () => {
   console.log("server Start at Port 3000!!!");

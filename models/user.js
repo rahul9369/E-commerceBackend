@@ -3,6 +3,7 @@ const validator = require("validator");
 const bcrypt = require("bcrypt");
 const fs = require("fs");
 const nodemailer = require("nodemailer");
+const Product = require("./product");
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -18,16 +19,17 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+
+  cart: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product12",
+    },
+  ],
 });
 
 // Load the HTML template once
 const htmlTemplate = fs.readFileSync("htmlTamplates/newSignup.html", "utf-8");
-
-// Function to replace placeholder in template
-// function replacePlaceholder(template, username) {
-//   return template.replace("{{username}}", username); // Replaces the placeholder with the actual username
-//}
-
 function replacePlaceholder(template, username) {
   return template.replace("{{username}}", username);
 }
