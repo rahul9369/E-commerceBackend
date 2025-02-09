@@ -37,9 +37,9 @@ router.delete("/product/:id/delete", deleteProduct);
 router.post("/product/:id/review", commentProduct);
 
 //update the comment of the product
-router.patch("/product/:id/review/:Rid", editcommentProduct);
+router.patch("/product/:Rid/review", editcommentProduct);
 
 //delete the comment of the product
-router.delete("/product/:id/review/:Rid/delete", deletecommentProduct);
+router.delete("/product/:Rid/review/delete", deletecommentProduct);
 
 module.exports = router;

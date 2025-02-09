@@ -12,9 +12,6 @@ const profileSchema = new mongoose.Schema({
   password: {
     type: String,
   },
-  img: {
-    type: String,
-  },
   address: {
     type: String,
   },

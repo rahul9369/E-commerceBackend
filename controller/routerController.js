@@ -34,12 +34,17 @@ const addProduct = async (req, res) => {
 
 const getProduct = async (req, res) => {
   try {
-    const Prod = await Product.findById(req.params.id).populate("Reviews");
+    const Prod = await Product.findById(req.params.id).populate({
+      path: "Reviews",
+      populate: { path: "user" },
+    });
+
     console.log(Prod);
     // console.log(req.params.id);
     // res.send(Prod);
     res.status(200).json({ Prod, massage: "Get Particular Product!!" });
   } catch (err) {
+    console.log(err);
     res.status(400).json({ error: err.massage });
   }
 };
@@ -80,18 +85,29 @@ const commentProduct = async (req, res) => {
   try {
     const Prod = await Product.findById(req.params.id);
     console.log(req.body);
-    const { rating, comment } = req.body;
-    // const rating = req.body.rating;
+    const { rating, comment, userid } = req.body;
+    //const rating = req.body.rating;
     // const comment = req.body.comment;
+    console.log(comment);
+    console.log(rating);
     const review = new Review({
-      rating,
-      comment,
+      rating: rating,
+      comment: comment,
+      user: userid,
     });
     Prod.Reviews.push(review);
-    await review.save();
+    const fullComment = await (await review.save()).populate("user");
+    console.log(fullComment);
     await Prod.save();
-    res.status(200).json({ massage: "comment added successfully", review });
+    console.log(review);
+    res.status(200).json({
+      massage: "comment added successfully",
+      comment: fullComment.comment,
+      rating: fullComment.rating,
+      user: fullComment.user,
+    });
   } catch (err) {
+    console.log(err);
     res.status(400).json({
       error: "cannot add comment due to internal error ",
       error: err.massage,
@@ -101,33 +117,19 @@ const commentProduct = async (req, res) => {
 
 const editcommentProduct = async (req, res) => {
   try {
-    const { id, Rid } = req.params;
+    const { Rid } = req.params;
     const { ratingV, commentV } = req.body;
 
     // Check if the product exists (optional)
-    const product = await Product.findById(id).populate("Reviews");
+    const Reviews = await Review.findByIdAndUpdate(Rid, {
+      rating: ratingV,
+      comment: commentV,
+    });
 
-    console.log(product);
-    if (!product) {
+    console.log(Reviews);
+    if (!Reviews) {
       return res.status(404).json({ message: "Product not found" });
     }
-
-    // Update the review directly in the Review collection
-    const review = await Review.findById(Rid);
-    if (!review) {
-      return res.status(404).json({ message: "Review not found" });
-    }
-
-    console.log(review);
-
-    // Update review's fields
-    review.rating = ratingV;
-    review.comment = commentV;
-
-    console.log(review);
-
-    // Save the updated review
-    await review.save();
 
     res.status(200).json({ message: "Review updated successfully" });
   } catch (err) {
@@ -139,53 +141,15 @@ const editcommentProduct = async (req, res) => {
   }
 };
 
-// const editcommentProduct = async (req, res) => {
-//   try {
-//     const { id, Rid } = req.params;
-//     const { ratingV, commentV } = req.body;
-
-//     console.log(ratingV, " and ", commentV);
-//     console.log(id, " and", Rid);
-
-//     const Prod = await Review.findByIdAndUpdate(Rid, {
-//       rating: ratingV,
-//       comment: commentV,
-//     });
-
-//     console.log(Prod);
-
-//     res.status(200).json({ message: "Edited the comment successfully" });
-//   } catch (err) {
-//     console.log(err.message);
-//     res.status(400).json({
-//       message: "Failed to edit the comment due to server error",
-//       error: err.message,
-//     });
-//   }
-// };
-
 const deletecommentProduct = async (req, res) => {
   try {
-    const { id, Rid } = req.params;
+    const { Rid } = req.params;
 
-    const product = await Product.findById(id);
-    if (!product) {
+    const Reviews = await Review.findByIdAndDelete(Rid);
+    if (!Reviews) {
       return res.status(404).json({ message: "Product not found!" });
     }
-    console.log(product);
-    const reviewIndex = product.Reviews.indexOf(Rid);
-    console.log(reviewIndex);
-    if (reviewIndex === -1) {
-      return res.status(404).json({ message: "Review not found!" });
-    }
-
-    // Remove the review from the product's Reviews array
-    product.Reviews.splice(reviewIndex, 1);
-    await product.save();
-
-    // Delete the review from the Review collection
-    await Review.findByIdAndDelete(Rid);
-
+    console.log(Reviews);
     res.status(200).json({ message: "Review deleted successfully!" });
   } catch (err) {
     res.status(400).json({
